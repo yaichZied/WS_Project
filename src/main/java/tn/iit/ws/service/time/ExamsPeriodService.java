@@ -9,13 +9,13 @@ import tn.iit.ws.repositories.ExamsPeriodRepository;
 import tn.iit.ws.service.GenericService;
 
 @Service
-public class ExamPeriodService extends GenericService<ExamsPeriod, Long> {
+public class ExamsPeriodService extends GenericService<ExamsPeriod, Long> {
 	@Autowired
-	private ExamsPeriodRepository examPeriodRepository;
+	private ExamsPeriodRepository examsPeriodRepository;
 
 	@Override
 	protected JpaRepository<ExamsPeriod, Long> getRepository() {
-		return examPeriodRepository;
+		return examsPeriodRepository;
 	}
 
 }
