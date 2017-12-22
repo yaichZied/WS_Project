@@ -20,7 +20,6 @@ public class Teacher extends User {
 	private static final long serialVersionUID = -2733994786562901142L;
 	@ManyToMany
 	private List<Group> groupes;
-	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"),new SimpleGrantedAuthority("ROLE_TEACHER"));
 	}

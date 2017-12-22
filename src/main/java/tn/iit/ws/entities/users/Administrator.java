@@ -16,7 +16,6 @@ import lombok.Setter;
 public class Administrator extends User{
 	private static final long serialVersionUID = 6055966936098766002L;
 
-	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"),new SimpleGrantedAuthority("ROLE_ADMIN"));
 	}

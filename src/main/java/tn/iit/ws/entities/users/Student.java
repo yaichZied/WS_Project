@@ -19,7 +19,6 @@ public class Student extends User{
 	private static final long serialVersionUID = 7671129186706784480L;
 	@ManyToOne
 	private Group groupe;
-	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"),new SimpleGrantedAuthority("ROLE_STUDENT"));
 	}
