@@ -1,7 +1,6 @@
 package tn.iit.ws.security.config.filters;
 
 import static tn.iit.ws.security.config.SecurityConstants.EXPIRATION_TIME;
-import static tn.iit.ws.security.config.SecurityConstants.HEADER_STRING;
 import static tn.iit.ws.security.config.SecurityConstants.SECRET;
 import static tn.iit.ws.security.config.SecurityConstants.TOKEN_PREFIX;
 
@@ -19,37 +18,63 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import tn.iit.ws.entities.users.User;
+
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-    private AuthenticationManager authenticationManager;
+	private AuthenticationManager authenticationManager;
+	private ObjectMapper mapper;
+	public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
+		this.authenticationManager = authenticationManager;
+		mapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(Authentication.class, new UserTokenAdder());
+		mapper.registerModule(module);
+	}
 
-    public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
-    }
+	@Override
+	public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
+			throws AuthenticationException {
+		return authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken(req.getParameter("username"), req.getParameter("password")));
+	}
 
-    @Override
-    public Authentication attemptAuthentication(HttpServletRequest req,
-                                                HttpServletResponse res) throws AuthenticationException {
-    	return authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                		req.getParameter("username"),
-                		req.getParameter("password"))
-        );
-    }
+	@Override
+	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
+			Authentication auth) throws IOException, ServletException {
+		mapper.writeValue(res.getOutputStream(), auth);
+	}
+	private static class UserTokenAdder extends StdSerializer<Authentication>
+	{
+		private static final long serialVersionUID = -4540931552054033264L;
 
-    @Override
-    protected void successfulAuthentication(HttpServletRequest req,
-                                            HttpServletResponse res,
-                                            FilterChain chain,
-                                            Authentication auth) throws IOException, ServletException {
+		public UserTokenAdder() {
+	        this(null);
+	    }
+	   
+	    public UserTokenAdder(Class<Authentication> t) {
+	        super(t);
+	    }
 
-        String token = Jwts.builder()
-                .setSubject(((User) auth.getPrincipal()).getUsername())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS512, SECRET.getBytes())
-                .compact();
-        res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
-    }
+		@Override
+		public void serialize(Authentication auth, JsonGenerator jgen, SerializerProvider arg2) throws IOException {
+			
+			
+			String token = Jwts.builder().setSubject(((User) auth.getPrincipal()).getUsername())
+					.setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+					.signWith(SignatureAlgorithm.HS512, SECRET.getBytes()).compact();
+			
+			jgen.writeStartObject();
+	        jgen.writeStringField("token", TOKEN_PREFIX + token);
+	        jgen.writeObjectField("user", auth.getPrincipal());
+	        jgen.writeEndObject();
+		}
+	}
 }
