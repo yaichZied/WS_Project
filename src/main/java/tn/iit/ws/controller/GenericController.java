@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -13,6 +14,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,6 +48,9 @@ import lombok.Setter;
 public abstract class GenericController<T, V extends Serializable> {
 	private static final Pattern PATTERN_ENTITY = Pattern.compile("\\<(.*)\\,");
 	private final Class<T> ENTITY;
+	private static final List<Class<?>> NATIVES = Arrays.asList(new Class<?>[] { String.class, Integer.class, Long.class, Short.class,
+		Double.class, Float.class, int.class, long.class, short.class, double.class, float.class,
+		BigDecimal.class, BigInteger.class });
 
 	public GenericController() {
 		try {
@@ -149,6 +158,17 @@ public abstract class GenericController<T, V extends Serializable> {
 		}
 	}
 
+	@RequestMapping(value = "structure", method = RequestMethod.GET)
+	@ResponseBody
+	public void structure(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			sendResult(request, response, ENTITY);
+		} catch (JsonGenerationException e) {
+		} catch (JsonMappingException e) {
+		} catch (IOException e) {
+		}
+	}
+
 	@RequestMapping(value = "{id}", method = RequestMethod.PUT)
 	@ResponseBody
 	@Transactional
@@ -220,6 +240,12 @@ public abstract class GenericController<T, V extends Serializable> {
 			module.addSerializer(ENTITY, new CustomSerializer(ENTITY, fields));
 			mapper.registerModule(module);
 		}
+
+		SimpleModule module = new SimpleModule("ClassSerializer", new Version(1, 0, 0, null, null, null));
+		module.addSerializer(Class.class, new ClassSerializer(Class.class));
+		module.addSerializer(Field.class, new FieldSerializer(Field.class));
+		//module.addSerializer(Object.class, new ObjectSerializer(Object.class));
+		mapper.registerModule(module);
 		mapper.writeValue(response.getOutputStream(), list);
 	}
 
@@ -367,7 +393,7 @@ public abstract class GenericController<T, V extends Serializable> {
 		public String process(Class<?> clazz) {
 			String verif = verify(clazz);
 			if (verif != null) {
-				this.id = "id"+UUID.randomUUID().toString().replaceAll("\\-", "_");
+				this.id = "id" + UUID.randomUUID().toString().replaceAll("\\-", "_");
 				return String.format(" %s %s %s ", verif, operator, ":" + this.id);
 			} else {
 				return "true";
@@ -397,17 +423,14 @@ public abstract class GenericController<T, V extends Serializable> {
 		}
 
 		List<String> operators = Arrays.asList(new String[] { ">", "<", ">=", "<=", "=" });
-		List<Class<?>> natives = Arrays.asList(new Class<?>[] { String.class, Integer.class, Long.class, Short.class,
-				Double.class, Float.class, int.class, long.class, short.class, double.class, float.class,
-				BigDecimal.class, BigInteger.class });
-
+		
 		private String existField(String[] fields, Class<?> clazz, int index, String res) {
 			Class<?> cl = clazz;
 			while (!clazz.equals(Object.class)) {
 				try {
 					Field f = cl.getDeclaredField(fields[index]);
 					if (index + 1 == fields.length) {
-						if (natives.contains(f.getType())) {
+						if (NATIVES.contains(f.getType())) {
 							return String.format("%s.%s", res, f.getName());
 						} else {
 							String id = getEntityIdFieldName(f.getType());
@@ -499,5 +522,62 @@ public abstract class GenericController<T, V extends Serializable> {
 					&& (name.equalsIgnoreCase("and") || name.equalsIgnoreCase("or"));
 		}
 
+	}
+
+	private class ClassSerializer extends StdSerializer<Class> {
+		private static final long serialVersionUID = 6091816030284681907L;
+
+		public ClassSerializer(Class t) {
+			super(t);
+		}
+
+		@Override
+		public void serialize(Class t, JsonGenerator jsonGenerator, SerializerProvider serializer) throws IOException {
+			Class cl = t;
+			Field[] fields;
+			jsonGenerator.writeStartObject();
+			List<Field> fList = new ArrayList<>();
+			while (!cl.equals(Object.class)) {
+				fields = cl.getDeclaredFields();
+				fList.addAll(Arrays.asList(fields));
+				cl = cl.getSuperclass();
+			}
+			jsonGenerator.writeObjectField("fields", fList);
+			jsonGenerator.writeEndObject();
+		}
+	}
+
+	
+	private class FieldSerializer extends StdSerializer<Field> {
+		private static final long serialVersionUID = 6091816030284681907L;
+
+		public FieldSerializer(Class t) {
+			super(t);
+		}
+
+		@Override
+		public void serialize(Field t, JsonGenerator jsonGenerator, SerializerProvider serializer) throws IOException {
+			jsonGenerator.writeStartObject();
+			jsonGenerator.writeStringField("name", t.getName());
+			String s = t.getType().getSimpleName();
+			s = Character.toLowerCase(s.charAt(0)) + s.substring(1);
+			jsonGenerator.writeStringField("type", s);
+			if (t.isAnnotationPresent(Id.class)) {
+				jsonGenerator.writeBooleanField("id", Boolean.TRUE);
+			}
+			if (t.isAnnotationPresent(ManyToMany.class)) {
+				jsonGenerator.writeBooleanField("manyToMany", Boolean.TRUE);
+			}
+			if (t.isAnnotationPresent(ManyToOne.class)) {
+				jsonGenerator.writeBooleanField("manyToOne", Boolean.TRUE);
+			}
+			if (t.isAnnotationPresent(OneToMany.class)) {
+				jsonGenerator.writeBooleanField("oneToMany", Boolean.TRUE);
+			}
+			if (t.isAnnotationPresent(OneToOne.class)) {
+				jsonGenerator.writeBooleanField("oneToOne", Boolean.TRUE);
+			}
+			jsonGenerator.writeEndObject();
+		}
 	}
 }

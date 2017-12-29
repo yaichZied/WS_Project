@@ -15,4 +15,9 @@ public class Block {
 	@GeneratedValue
 	private Long id;
 	private String name;
+	
+	public String getDisplayName()
+	{
+		return name;
+	}
 }

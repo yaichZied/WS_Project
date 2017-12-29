@@ -18,4 +18,8 @@ public class SubLevel {
 	@ManyToOne
 	private Level level;
 	private String name;
+	public String getDisplayName()
+	{
+		return name;
+	}
 }

@@ -18,4 +18,8 @@ public class Level {
 	@ManyToOne
 	private Department department;
 	private String name;
+	public String getDisplayName()
+	{
+		return name;
+	}
 }

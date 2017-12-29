@@ -1,6 +1,7 @@
 package tn.iit.ws.security.config.filters;
 
 import static tn.iit.ws.security.config.SecurityConstants.EXPIRATION_TIME;
+import static tn.iit.ws.security.config.SecurityConstants.HEADER_STRING;
 import static tn.iit.ws.security.config.SecurityConstants.SECRET;
 import static tn.iit.ws.security.config.SecurityConstants.TOKEN_PREFIX;
 
@@ -40,10 +41,18 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	}
 
 	@Override
-	public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
+	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
+		if (request.getHeader("Origin") != null) {
+			String origin = request.getHeader("Origin");
+			response.addHeader("Access-Control-Allow-Origin", origin);
+			response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+			response.addHeader("Access-Control-Allow-Credentials", "true");
+			response.addHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"));
+		}
 		return authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(req.getParameter("username"), req.getParameter("password")));
+				
+				new UsernamePasswordAuthenticationToken(request.getParameter("username"), request.getParameter("password")));
 	}
 
 	@Override

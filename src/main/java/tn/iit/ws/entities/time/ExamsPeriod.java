@@ -8,5 +8,9 @@ import lombok.Setter;
 @Entity
 @Getter @Setter
 public class ExamsPeriod extends InterruptionPeriod{
-	
+	@Override
+	public String getDisplayName()
+	{
+		return String.format("Exams : %s", super.getDisplayName());
+	}
 }

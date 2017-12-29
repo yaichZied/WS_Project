@@ -7,7 +7,7 @@ import tn.iit.ws.controller.GenericController;
 import tn.iit.ws.entities.all.SubLevel;
 
 @RestController
-@RequestMapping("sublevel")
+@RequestMapping("subLevel")
 public class SubLevelController extends GenericController<SubLevel, Long> {
 	
 }

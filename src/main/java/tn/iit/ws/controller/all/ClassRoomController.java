@@ -7,7 +7,7 @@ import tn.iit.ws.controller.GenericController;
 import tn.iit.ws.entities.all.ClassRoom;
 
 @RestController
-@RequestMapping("classroom")
+@RequestMapping("classRoom")
 public class ClassRoomController extends GenericController<ClassRoom, Long> {
 	
 }

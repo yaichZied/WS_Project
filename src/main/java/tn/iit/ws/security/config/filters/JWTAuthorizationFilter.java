@@ -22,46 +22,53 @@ import io.jsonwebtoken.Jwts;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
-    public JWTAuthorizationFilter(AuthenticationManager authManager) {
-        super(authManager);
-    }
+	public JWTAuthorizationFilter(AuthenticationManager authManager) {
+		super(authManager);
+	}
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest req,
-                                    HttpServletResponse res,
-                                    FilterChain chain) throws IOException, ServletException {
-        String header = req.getHeader(HEADER_STRING);
-
-        if (header == null || !header.startsWith(TOKEN_PREFIX)) {
-            chain.doFilter(req, res);
-            return;
-        }
-
-        try {
-        	UsernamePasswordAuthenticationToken authentication = getAuthentication(req);
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            
-		} catch (ExpiredJwtException e) {
-			
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
+		if (request.getHeader("Origin") != null) {
+			String origin = request.getHeader("Origin");
+			response.addHeader("Access-Control-Allow-Origin", origin);
+			response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+			response.addHeader("Access-Control-Allow-Credentials", "true");
+			response.addHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"));
 		}
-        chain.doFilter(req, res);
-    }
+		if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
+			response.getWriter().print("OK");
+			response.getWriter().flush();
+			return;
+		}
+		String header = request.getHeader(HEADER_STRING);
+		if (header == null || !header.startsWith(TOKEN_PREFIX)) {
+			chain.doFilter(request, response);
+			return;
+		}
 
-    private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
-        String token = request.getHeader(HEADER_STRING);
-        if (token != null) {
-            String user = Jwts.parser()
-                    .setSigningKey(SECRET.getBytes())
-                    .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
-                    .getBody()
-                    .getSubject();
+		try {
+			UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
 
-            if (user != null) {
-                return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
-            }
-            return null;
-        }
-        return null;
-    }
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		} catch (ExpiredJwtException e) {
+
+		}
+		chain.doFilter(request, response);
+	}
+
+	private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
+		String token = request.getHeader(HEADER_STRING);
+		if (token != null) {
+			String user = Jwts.parser().setSigningKey(SECRET.getBytes()).parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+					.getBody().getSubject();
+
+			if (user != null) {
+				return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+			}
+			return null;
+		}
+		return null;
+	}
 }
