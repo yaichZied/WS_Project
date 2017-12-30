@@ -1,7 +1,6 @@
 package tn.iit.ws.security.config.filters;
 
 import static tn.iit.ws.security.config.SecurityConstants.EXPIRATION_TIME;
-import static tn.iit.ws.security.config.SecurityConstants.HEADER_STRING;
 import static tn.iit.ws.security.config.SecurityConstants.SECRET;
 import static tn.iit.ws.security.config.SecurityConstants.TOKEN_PREFIX;
 

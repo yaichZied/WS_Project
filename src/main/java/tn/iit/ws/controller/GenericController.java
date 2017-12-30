@@ -3,12 +3,16 @@ package tn.iit.ws.controller;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
+import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,14 +48,15 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import lombok.Getter;
 import lombok.Setter;
+import tn.iit.ws.entities.time.TimeSlot;
 
 @CrossOrigin("*")
 public abstract class GenericController<T, V extends Serializable> {
 	private static final Pattern PATTERN_ENTITY = Pattern.compile("\\<(.*)\\,");
 	private final Class<T> ENTITY;
-	private static final List<Class<?>> NATIVES = Arrays.asList(new Class<?>[] { String.class, Integer.class, Long.class, Short.class,
-		Double.class, Float.class, int.class, long.class, short.class, double.class, float.class,
-		BigDecimal.class, BigInteger.class });
+	private static final List<Class<?>> NATIVES = Arrays.asList(
+			new Class<?>[] { String.class, Integer.class, Long.class, Short.class, Double.class, Float.class, int.class,
+					long.class, short.class, double.class, float.class, BigDecimal.class, BigInteger.class });
 
 	public GenericController() {
 		try {
@@ -227,8 +233,9 @@ public abstract class GenericController<T, V extends Serializable> {
 	@RequestMapping(value = "{id}", method = RequestMethod.DELETE)
 	@ResponseBody
 	@Transactional
-	public void deleteById(@PathVariable(name = "id") V id) {
+	public String deleteById(@PathVariable(name = "id") V id) {
 		em.remove(em.find(ENTITY, id));
+		return "{\"success\" : true}";
 	}
 
 	private void sendResult(HttpServletRequest request, HttpServletResponse response, Object list)
@@ -244,7 +251,8 @@ public abstract class GenericController<T, V extends Serializable> {
 		SimpleModule module = new SimpleModule("ClassSerializer", new Version(1, 0, 0, null, null, null));
 		module.addSerializer(Class.class, new ClassSerializer(Class.class));
 		module.addSerializer(Field.class, new FieldSerializer(Field.class));
-		//module.addSerializer(Object.class, new ObjectSerializer(Object.class));
+		// module.addSerializer(Object.class, new
+		// ObjectSerializer(Object.class));
 		mapper.registerModule(module);
 		mapper.writeValue(response.getOutputStream(), list);
 	}
@@ -331,7 +339,20 @@ public abstract class GenericController<T, V extends Serializable> {
 				}
 
 			}
-			jsonGenerator.writeEndObject();
+			Method method;
+			try {
+				method = ENTITY.getDeclaredMethod("getDisplayName");
+				boolean accessible = method.isAccessible();
+				method.setAccessible(true);
+				jsonGenerator.writeObjectField("displayName", method.invoke(t));
+				method.setAccessible(accessible);
+				jsonGenerator.writeEndObject();
+			} catch (NoSuchMethodException | SecurityException e) {
+			} catch (IllegalAccessException e) {
+			} catch (IllegalArgumentException e) {
+			} catch (InvocationTargetException e) {
+			}
+			
 		}
 	}
 
@@ -423,7 +444,7 @@ public abstract class GenericController<T, V extends Serializable> {
 		}
 
 		List<String> operators = Arrays.asList(new String[] { ">", "<", ">=", "<=", "=" });
-		
+
 		private String existField(String[] fields, Class<?> clazz, int index, String res) {
 			Class<?> cl = clazz;
 			while (!clazz.equals(Object.class)) {
@@ -542,12 +563,27 @@ public abstract class GenericController<T, V extends Serializable> {
 				fList.addAll(Arrays.asList(fields));
 				cl = cl.getSuperclass();
 			}
+
 			jsonGenerator.writeObjectField("fields", fList);
+
+			Reflections reflections = new Reflections("tn.iit.ws.entities");
+			Set<Class<? extends T>> classes = reflections.getSubTypesOf(ENTITY);
+			Iterator<Class<? extends T>> iter = classes.iterator();
+			jsonGenerator.writeArrayFieldStart("subClasses");
+			while (iter.hasNext()) {
+				String name = iter.next().getSimpleName();
+
+				jsonGenerator
+						.writeString(String.format("%s%s", Character.toLowerCase(name.charAt(0)), name.substring(1)));
+			}
+			jsonGenerator.writeEndArray();
+			if (Modifier.isAbstract(t.getModifiers())) {
+				jsonGenerator.writeBooleanField("abstract", Boolean.TRUE);
+			}
 			jsonGenerator.writeEndObject();
 		}
 	}
 
-	
 	private class FieldSerializer extends StdSerializer<Field> {
 		private static final long serialVersionUID = 6091816030284681907L;
 
