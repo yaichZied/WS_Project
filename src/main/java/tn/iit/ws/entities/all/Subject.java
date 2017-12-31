@@ -15,4 +15,8 @@ public class Subject {
 	@GeneratedValue
 	private Long id;
 	private String name;
+	public String getDisplayName()
+	{
+		return name;
+	}
 }

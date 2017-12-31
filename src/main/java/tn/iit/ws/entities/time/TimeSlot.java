@@ -17,4 +17,10 @@ public abstract class TimeSlot {
 	private Long id;
 	@ManyToOne
 	private Semester semester;
+
+	public String getDisplayName() {
+		return "";
+
+	}
+
 }

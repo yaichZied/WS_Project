@@ -20,4 +20,8 @@ public class Group {
 	@ManyToOne
 	private SubLevel subLevel;
 	private String name;
+	public String getDisplayName()
+	{
+		return name;
+	}
 }

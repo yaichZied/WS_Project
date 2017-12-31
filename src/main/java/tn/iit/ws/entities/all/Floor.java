@@ -18,4 +18,8 @@ public class Floor {
 	private String name;
 	@ManyToOne
 	private Block block;
+	public String getDisplayName()
+	{
+		return name;
+	}
 }

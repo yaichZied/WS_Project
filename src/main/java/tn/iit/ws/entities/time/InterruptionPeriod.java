@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 
 @Entity
 @Data
-@EqualsAndHashCode(of="id")
+@EqualsAndHashCode(of = "id")
 public abstract class InterruptionPeriod {
 	@Id
 	@GeneratedValue
@@ -22,7 +22,13 @@ public abstract class InterruptionPeriod {
 	private Date begin;
 	private Date end;
 	private String name;
+
 	public boolean isInPeriod(Date date) {
-		return date.after(begin)&&date.before(end);
+		return date.after(begin) && date.before(end);
+	}
+
+	public String getDisplayName() {
+		return String.format(" From %1$ta %1$td %1$tB %1$tY To  %2$ta %2$td %2$tB %2$tY", begin, end);
+
 	}
 }

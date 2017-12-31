@@ -18,4 +18,9 @@ public class ClassRoom {
 	@ManyToOne
 	private Floor floor;
 	private String name;
+	
+	public String getDisplayName()
+	{
+		return name;
+	}
 }

@@ -1,5 +1,6 @@
 package tn.iit.ws.entities.all;
 
+import java.text.DateFormat;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -20,4 +21,11 @@ public class Pointing {
 	private Date date;
 	@ManyToOne
 	private Course course;
+	public String getDisplayName()
+	{
+		DateFormat df = DateFormat.getDateInstance();
+		if(course!=null)
+			return String.format("Pointing for : %s at %s ",course.getDisplayName(), df.format(date));
+		return String.format("Pointing at %s ", df.format(date));
+	}
 }
