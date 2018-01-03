@@ -10,8 +10,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -48,7 +50,11 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import lombok.Getter;
 import lombok.Setter;
-import tn.iit.ws.entities.time.TimeSlot;
+import tn.iit.ws.utils.annotations.If;
+import tn.iit.ws.utils.annotations.Max;
+import tn.iit.ws.utils.annotations.Min;
+import tn.iit.ws.utils.annotations.Regex;
+import tn.iit.ws.utils.annotations.Type;
 
 @CrossOrigin("*")
 public abstract class GenericController<T, V extends Serializable> {
@@ -57,7 +63,11 @@ public abstract class GenericController<T, V extends Serializable> {
 	private static final List<Class<?>> NATIVES = Arrays.asList(
 			new Class<?>[] { String.class, Integer.class, Long.class, Short.class, Double.class, Float.class, int.class,
 					long.class, short.class, double.class, float.class, BigDecimal.class, BigInteger.class });
-
+	private static final Map<String , String> REGEXES;
+	static {
+		REGEXES = new HashMap<>();
+		REGEXES.put("email", "");
+	}
 	public GenericController() {
 		try {
 			ENTITY = getEntityClass();
@@ -597,6 +607,51 @@ public abstract class GenericController<T, V extends Serializable> {
 			jsonGenerator.writeStringField("name", t.getName());
 			String s = t.getType().getSimpleName();
 			s = Character.toLowerCase(s.charAt(0)) + s.substring(1);
+			Type type = t.getAnnotation(Type.class);
+			if(type!=null&&!type.value().isEmpty()) {
+				s = type.value();
+			}
+			Max max = t.getAnnotation(Max.class);
+			if(max!=null&&!max.value().isEmpty()) {
+				jsonGenerator.writeStringField("max", max.value());
+			}
+
+			Min min = t.getAnnotation(Min.class);
+			if(min!=null&&!min.value().isEmpty()) {
+				jsonGenerator.writeStringField("min", min.value());
+			}
+			Regex regex = t.getAnnotation(Regex.class);
+			if(regex!=null) {
+				if(!regex.type().isEmpty()&&REGEXES.get(regex.type())!=null) {
+					jsonGenerator.writeStringField("regex", REGEXES.get(regex.type()));
+				}
+				else
+				{
+					if(!regex.value().isEmpty()) {
+						jsonGenerator.writeStringField("regex", regex.value());
+					}
+				}
+			}
+			If iff = t.getAnnotation(If.class);
+			if(iff!=null&&!iff.value().isEmpty()) {
+				StringBuilder sb = new StringBuilder();
+				if(!iff.not()) {
+					sb.append("!");
+				}
+				sb.append("entity");
+				String[] list = iff.value().split("\\.");
+				for (int i = 0; i < list.length; i++) {
+					sb.append(String.format("['%s']", list[i].trim()));
+				}
+				if(!iff.operator().isEmpty()) {
+					sb.append("  ");
+					sb.append(iff.operator());
+					sb.append("  ");
+					sb.append(iff.operand());
+				}
+				
+				jsonGenerator.writeStringField("if", sb.toString());
+			}
 			jsonGenerator.writeStringField("type", s);
 			if (t.isAnnotationPresent(Id.class)) {
 				jsonGenerator.writeBooleanField("id", Boolean.TRUE);
