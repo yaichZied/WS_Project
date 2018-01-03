@@ -10,6 +10,7 @@ pipeline {
       steps {
         sh 'mvn clean'
         sh 'mvn install'
+        sh 'sudo mvn spring-boot:stop'
         sh 'sudo mvn spring-boot:run'
       }
     }
