@@ -635,7 +635,7 @@ public abstract class GenericController<T, V extends Serializable> {
 			If iff = t.getAnnotation(If.class);
 			if(iff!=null&&!iff.value().isEmpty()) {
 				StringBuilder sb = new StringBuilder();
-				if(!iff.not()) {
+				if(iff.not()) {
 					sb.append("!");
 				}
 				sb.append("entity");
