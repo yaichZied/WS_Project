@@ -12,6 +12,7 @@ pipeline {
         sh 'mvn install'
         sh 'sudo fuser -k 80/tcp || true'
         sh 'sudo mvn spring-boot:run'
+        
       }
     }
   }
