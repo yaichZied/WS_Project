@@ -1,6 +1,7 @@
 package tn.iit.ws.service;
 
 import java.security.SecureRandom;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
@@ -12,8 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import tn.iit.ws.entities.all.Block;
+import tn.iit.ws.entities.time.FixedTimeSlot;
 import tn.iit.ws.entities.users.Administrator;
 import tn.iit.ws.repositories.BlockRepository;
+import tn.iit.ws.repositories.TimeSlotRepository;
 import tn.iit.ws.repositories.UserRepository;
 
 @Component
@@ -24,6 +27,8 @@ public class InitComponent {
 	private UserRepository userRepository;
 	@Autowired
 	private BlockRepository blockRepository;
+	@Autowired
+	private TimeSlotRepository timeSlotRepository;
 	@PostConstruct
 	private void init() {
 		if(userRepository.count()==0)
@@ -43,6 +48,15 @@ public class InitComponent {
 				block.setName(rs.nextString());
 				blockRepository.save(block);
 			}
+		}
+		if(timeSlotRepository.count()==0) {
+			FixedTimeSlot time = new FixedTimeSlot();
+			time.setDate(new Date());
+			time.getDate().setHours(8);
+			time.getDate().setMinutes(0);
+			time.getDate().setSeconds(0);
+			time.setDuration(120);
+			timeSlotRepository.save(time);
 		}
 	}
 }
