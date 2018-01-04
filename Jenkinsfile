@@ -10,7 +10,7 @@ pipeline {
       steps {
         sh 'mvn clean'
         sh 'mvn install'
-        sh 'sudo fuser -k 80/tcp; exit 0'
+        sh 'sudo fuser -k 80/tcp || true'
         sh 'sudo mvn spring-boot:run'
       }
     }
