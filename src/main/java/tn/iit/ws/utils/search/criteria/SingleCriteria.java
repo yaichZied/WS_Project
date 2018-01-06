@@ -1,12 +1,15 @@
 package tn.iit.ws.utils.search.criteria;
 
 import java.lang.reflect.Field;
+import java.sql.Date;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.ManyToOne;
 import javax.persistence.Query;
+import javax.persistence.TemporalType;
 
 import org.reflections.Reflections;
 
@@ -23,9 +26,11 @@ public class SingleCriteria extends Criteria {
 	private Object value;
 	private String id;
 	private Class<?> clazz;
+
 	public SingleCriteria(Class<?> clazz) {
-		this.clazz=clazz;
+		this.clazz = clazz;
 	}
+
 	@Override
 	public String process(Class<?> clazz) {
 		this.id = String.format("id%s", UUID.randomUUID().toString().replaceAll("\\-", "_"));
@@ -34,8 +39,23 @@ public class SingleCriteria extends Criteria {
 
 	@Override
 	public void setValues(Query query) {
-		System.out.println("setting value "+this.id+" : "+value);
-		query.setParameter(this.id, value);
+		System.out.println("setting value " + this.id + " : " + value);
+		if (this.value instanceof Date) {
+			Date d = (Date) this.value;
+			Calendar c = Calendar.getInstance();
+			c.setTime(d);
+			query.setParameter(this.id, c, TemporalType.DATE);
+		} else {
+			if (this.value instanceof java.util.Date) {
+				java.util.Date d = (java.util.Date) this.value;
+				Calendar c = Calendar.getInstance();
+				c.setTime(d);
+				query.setParameter(this.id, c, TemporalType.DATE);
+			} else {
+				query.setParameter(this.id, value);
+			}
+		}
+
 	}
 
 	public void setField(String field) {
@@ -56,14 +76,14 @@ public class SingleCriteria extends Criteria {
 		}
 		if (fields.length == index + 1) {
 			sb.append(field.getName());
-			if(field.isAnnotationPresent(ManyToOne.class)) {
+			if (field.isAnnotationPresent(ManyToOne.class)) {
 				sb.append(String.format(".%s", UtilConstants.getIdFieldOfEntityClass(field.getType()).getName()));
 			}
 		} else {
 			if (field.isAnnotationPresent(ManyToOne.class)) {
 				sb.append(field.getName());
 				sb.append(".");
-				buildField(fields, index + 1, field.getDeclaringClass(), sb);
+				buildField(fields, index + 1, field.getType(), sb);
 			} else {
 				throw new RuntimeException(
 						String.format("field %s of type %s is a native type", clazz.getSimpleName(), field.getName()));
@@ -85,20 +105,20 @@ public class SingleCriteria extends Criteria {
 			return res;
 		} else {
 			if (res.isAnnotationPresent(ManyToOne.class)) {
-				return searchField(fields, index+1, res.getDeclaringClass());
+				return searchField(fields, index + 1, res.getType());
 			} else {
 				throw new RuntimeException(
 						String.format("field %s of type %s is a native type", clazz.getSimpleName(), res.getName()));
 			}
 		}
-		
+
 	}
-	private static Field findFieldInClass(Class<?> clazz,String field)
-	{
+
+	private static Field findFieldInClass(Class<?> clazz, String field) {
 		return findFieldInClass(clazz, Object.class, field);
 	}
-	private static Field findFieldInClass(Class<?> clazz,Class<?> parent,String field)
-	{
+
+	private static Field findFieldInClass(Class<?> clazz, Class<?> parent, String field) {
 		Class<?> cl = clazz;
 		Field res = null;
 		while (!cl.equals(parent)) {
@@ -107,7 +127,7 @@ public class SingleCriteria extends Criteria {
 			} catch (NoSuchFieldException e) {
 			} catch (SecurityException e) {
 			}
-			cl=cl.getSuperclass();
+			cl = cl.getSuperclass();
 		}
 		Reflections reflections = new Reflections("tn.iit.ws");
 		Set<?> classes = reflections.getSubTypesOf(clazz);
@@ -115,7 +135,7 @@ public class SingleCriteria extends Criteria {
 		while (iter.hasNext()) {
 			cl = (Class<?>) iter.next();
 			res = findFieldInClass(cl, clazz, field);
-			if(res!=null) {
+			if (res != null) {
 				return res;
 			}
 		}

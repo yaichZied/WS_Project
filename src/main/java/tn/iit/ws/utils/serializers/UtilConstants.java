@@ -100,6 +100,13 @@ public class UtilConstants {
 			}
 			return obj.toString();
 		}
+		if (clazz.equals(Boolean.class)) {
+			if (obj instanceof JsonNode) {
+				JsonNode node = (JsonNode) obj;
+				return node.asBoolean();
+			}
+			return obj.toString();
+		}
 		if (clazz.equals(Date.class)) {
 			if (obj instanceof JsonNode) {
 				JsonNode node = (JsonNode) obj;

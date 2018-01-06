@@ -31,7 +31,12 @@ public class ClassSerializer<T> extends StdSerializer<Class<T>> {
 		List<Field> fList = new ArrayList<>();
 		while (!cl.equals(Object.class)) {
 			fields = cl.getDeclaredFields();
-			fList.addAll(Arrays.asList(fields));
+			for (int i = 0; i < fields.length; i++) {
+				if(!Modifier.isStatic(fields[i].getModifiers())){
+					fList.add(fields[i]);
+				}
+			}
+			
 			cl = cl.getSuperclass();
 		}
 

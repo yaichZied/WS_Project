@@ -42,12 +42,12 @@ public class ResponseSerializer<T> extends StdSerializer<T> {
 			method.setAccessible(true);
 			jsonGenerator.writeObjectField("displayName", method.invoke(t));
 			method.setAccessible(accessible);
-			jsonGenerator.writeEndObject();
 		} catch (NoSuchMethodException | SecurityException e) {
 		} catch (IllegalAccessException e) {
 		} catch (IllegalArgumentException e) {
 		} catch (InvocationTargetException e) {
 		}
+		jsonGenerator.writeEndObject();
 		
 	}
 	public String[] getFields() {

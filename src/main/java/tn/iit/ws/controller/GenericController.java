@@ -136,6 +136,8 @@ public abstract class GenericController<T, V extends Serializable> {
 		}
 		Query query = em.createQuery(sb.toString());
 		criteria.setValues(query);
+		System.out.println(query);
+		
 		System.out.println(sb.toString());;
 		if (skip != null) {
 			query.setFirstResult(skip);
@@ -161,6 +163,7 @@ public abstract class GenericController<T, V extends Serializable> {
 			responseMapper.sendResult(request, response, t);
 		} catch (JsonGenerationException e) {
 		} catch (JsonMappingException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
 		}
 	}

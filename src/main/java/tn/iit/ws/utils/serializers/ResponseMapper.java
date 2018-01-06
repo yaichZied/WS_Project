@@ -15,12 +15,15 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 public class ResponseMapper<T> {
 	private final ObjectMapper DEFAULT_MAPPER;
 	private final ObjectMapper FIELDS_MAPPER;
+	private final ResponseSerializer<T> FIELDS_SERIALIZER;
 
 	@SuppressWarnings("unchecked")
 	public ResponseMapper(Class<T> ENTITY) {
 
 		SimpleModule responseModule = new SimpleModule("ResponseModule", new Version(1, 0, 0, null, null, null));
-		responseModule.addSerializer(ENTITY, new ResponseSerializer<T>(ENTITY, ENTITY));
+
+		FIELDS_SERIALIZER=new ResponseSerializer<T>(ENTITY, ENTITY);
+		responseModule.addSerializer(ENTITY, FIELDS_SERIALIZER);
 
 		SimpleModule classFieldModule = new SimpleModule("ClassFieldModule", new Version(1, 0, 0, null, null, null));
 		classFieldModule.addSerializer((Class<Class<T>>) ENTITY.getClass(),
@@ -38,7 +41,8 @@ public class ResponseMapper<T> {
 	public void sendResult(HttpServletRequest request, HttpServletResponse response, Object list)
 			throws JsonGenerationException, JsonMappingException, IOException {
 		String[] fields = getFieldsFromRequest(request);
-		if (fields != null) {
+		if (fields != null && fields.length>0) {
+			FIELDS_SERIALIZER.setFields(fields);
 			FIELDS_MAPPER.writeValue(response.getOutputStream(), list);
 		} else {
 			DEFAULT_MAPPER.writeValue(response.getOutputStream(), list);
