@@ -18,6 +18,6 @@ public class FixedTimeSlot extends TimeSlot {
 
 	@Override
 	public String getDisplayName() {
-		return String.format("%2$d Hours : %1$ta %1$td %1$tB %1$tY : %s", date, duration);
+		return String.format("%2$d Hours : %1$ta %1$td %1$tB %1$tY ", date, duration);
 	}
 }

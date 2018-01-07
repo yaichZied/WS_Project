@@ -2,7 +2,6 @@ package tn.iit.ws.utils.serializers;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -28,11 +27,9 @@ public class ResponseSerializer<T> extends StdSerializer<T> {
 				field.setAccessible(true);
 				jsonGenerator.writeObjectField(field.getName(), field.get(t));
 				field.setAccessible(accessible);
-			} catch (NoSuchFieldException e) {
-			} catch (SecurityException e) {
-			} catch (IllegalArgumentException e) {
-			} catch (IllegalAccessException e) {
-			}
+			} catch (Exception e) {
+				e.printStackTrace();
+			} 
 
 		}
 		Method method;
@@ -40,15 +37,13 @@ public class ResponseSerializer<T> extends StdSerializer<T> {
 			method = ENTITY.getDeclaredMethod("getDisplayName");
 			boolean accessible = method.isAccessible();
 			method.setAccessible(true);
-			jsonGenerator.writeObjectField("displayName", method.invoke(t));
+			Object obj = method.invoke(t);
+			jsonGenerator.writeObjectField("displayName",obj );
 			method.setAccessible(accessible);
-		} catch (NoSuchMethodException | SecurityException e) {
-		} catch (IllegalAccessException e) {
-		} catch (IllegalArgumentException e) {
-		} catch (InvocationTargetException e) {
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		jsonGenerator.writeEndObject();
-		
 	}
 	public String[] getFields() {
 		return fields;

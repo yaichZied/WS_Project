@@ -38,7 +38,7 @@ public abstract class GenericController<T, V extends Serializable> {
 	private final Class<T> ENTITY;
 	@Autowired
 	private EntityManager em;
-
+	
 	private ResponseMapper<T> responseMapper;
 
 	@SuppressWarnings("unchecked")
@@ -182,8 +182,21 @@ public abstract class GenericController<T, V extends Serializable> {
 	@RequestMapping(value = "{id}", method = RequestMethod.PUT)
 	@ResponseBody
 	@Transactional
-	public void update(HttpServletRequest request, HttpServletResponse response, @RequestBody T entity,
+	public void update(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable(name = "id") V id) {
+		T entity = null;
+		try {
+			entity = new ObjectMapper().readValue(request.getInputStream(), ENTITY);
+		} catch (JsonParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (JsonMappingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		T t = em.find(ENTITY, id);
 		if (t != null) {
 			Class<?> type = entity.getClass();

@@ -29,6 +29,11 @@ public class Course {
 	private TimeSlot timeSlot;
 	public String getDisplayName()
 	{
-		return String.format("%s : %s ( %s : %s )", subject.getName(),teacher.getName(), group.getName(), classRoom.getName());
+		try {
+			return String.format("%s : %s ( %s : %s )", subject.getName(),teacher.getName(), group.getName(), classRoom.getName());
+		} catch (Exception e) {
+			return "Invalide";
+		}
+		
 	}
 }
