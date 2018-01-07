@@ -48,6 +48,12 @@ public class ResponseMapper<T> {
 			DEFAULT_MAPPER.writeValue(response.getOutputStream(), list);
 		}
 	}
+	
+	public void sendError(HttpServletResponse response, String error , int code)
+			throws JsonGenerationException, JsonMappingException, IOException {
+		response.setStatus(code);
+		DEFAULT_MAPPER.writeValue(response.getOutputStream(), new Error(error));
+	}
 
 	private String[] getFieldsFromRequest(HttpServletRequest request) {
 		String fs = request.getParameter("fields");
@@ -63,5 +69,14 @@ public class ResponseMapper<T> {
 			}
 		}
 		return res;
+	}
+}
+class Error{
+	private String error;
+	public Error(String error) {
+		this.error=error;
+	}
+	public String getError() {
+		return error;
 	}
 }

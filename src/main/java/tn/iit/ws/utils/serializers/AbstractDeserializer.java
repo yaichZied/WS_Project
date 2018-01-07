@@ -16,6 +16,7 @@ public class AbstractDeserializer<T> extends StdDeserializer<T> {
 
 	private static final long serialVersionUID = -2571876514376076895L;
 	private EntityManager entityManager;
+	
 	public AbstractDeserializer(Class<?> vc) {
 		super(vc);
 		this.entityManager = WsApplication.appConext.getBean(EntityManager.class);
@@ -29,6 +30,7 @@ public class AbstractDeserializer<T> extends StdDeserializer<T> {
 		Object id =node.get("id");
 		Class<?> idType = UtilConstants.getIdFieldOfEntityClass(handledType()).getType();
 		id=UtilConstants.parseValue(id, idType);
-		return (T) entityManager.find(handledType(), id);
+		T entity = (T) entityManager.find(handledType(), id);
+		return entity;
 	}
 }

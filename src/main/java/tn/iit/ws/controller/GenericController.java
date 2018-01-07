@@ -182,20 +182,15 @@ public abstract class GenericController<T, V extends Serializable> {
 	@RequestMapping(value = "{id}", method = RequestMethod.PUT)
 	@ResponseBody
 	@Transactional
-	public void update(HttpServletRequest request, HttpServletResponse response,
+	public void update(HttpServletRequest request, HttpServletResponse response, @RequestBody T entity,
 			@PathVariable(name = "id") V id) {
-		T entity = null;
-		try {
-			entity = new ObjectMapper().readValue(request.getInputStream(), ENTITY);
-		} catch (JsonParseException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (JsonMappingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		if(isAbstract()) {
+			try {
+				responseMapper.sendError(response, "Can't update this type : it is an abstract type", 404);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return;
 		}
 		T t = em.find(ENTITY, id);
 		if (t != null) {
@@ -235,16 +230,23 @@ public abstract class GenericController<T, V extends Serializable> {
 	@ResponseBody
 	@Transactional
 	public void save(HttpServletRequest request, HttpServletResponse response, @RequestBody T t) {
+		if(isAbstract()) {
+			try {
+				responseMapper.sendError(response, "Can't save this type : it is an abstract type", 404);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return;
+		}
 		UtilConstants.setIdOfEntity(t, null);
 		em.persist(t);
 		em.flush();
 		em.refresh(t);
 		try {
 			responseMapper.sendResult(request, response, t);
-		} catch (JsonGenerationException e) {
-		} catch (JsonMappingException e) {
-		} catch (IOException e) {
-		}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
 	}
 
 	@RequestMapping(value = "{id}", method = RequestMethod.DELETE)
@@ -275,5 +277,8 @@ public abstract class GenericController<T, V extends Serializable> {
 			}
 		}
 		return null;
+	}
+	private boolean isAbstract() {
+		return Modifier.isAbstract(ENTITY.getModifiers());
 	}
 }
