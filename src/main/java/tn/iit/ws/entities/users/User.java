@@ -7,16 +7,13 @@ import javax.persistence.Id;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import tn.iit.ws.utils.serializers.AbstractDeserializer;
 
 @Entity
 @Data
 @EqualsAndHashCode(of="id")
-@JsonDeserialize(using=UserDeserializer.class,contentAs=User.class)
 public abstract class User implements UserDetails{
 	private static final long serialVersionUID = 861474528215620204L;
 	@Id
@@ -45,12 +42,4 @@ public abstract class User implements UserDetails{
 	{
 		return name;
 	}
-}
-@SuppressWarnings("serial")
-class UserDeserializer<T> extends AbstractDeserializer<T> {
-	
-	public UserDeserializer() {
-		super(User.class);
-	}
-
 }

@@ -5,16 +5,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import tn.iit.ws.utils.serializers.AbstractDeserializer;
 
 @Entity
 @Data
 @EqualsAndHashCode(of="id")
-@JsonDeserialize(using=TimeSlotDeserializer.class,contentAs=TimeSlot.class)
 public abstract class TimeSlot {
 	@Id
 	@GeneratedValue
@@ -26,13 +22,4 @@ public abstract class TimeSlot {
 		return "";
 
 	}
-	
-}
-@SuppressWarnings("serial")
-class TimeSlotDeserializer<T> extends AbstractDeserializer<T> {
-	
-	public TimeSlotDeserializer() {
-		super(TimeSlot.class);
-	}
-
 }

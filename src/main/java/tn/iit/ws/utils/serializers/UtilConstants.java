@@ -236,12 +236,28 @@ public class UtilConstants {
 	}
 
 	public static Field getIdFieldOfEntityClass(Class<?> clazz) {
-		Field[] f = clazz.getDeclaredFields();
-		for (int i = 0; i < f.length; i++) {
-			f[i].setAccessible(true);
-			if (f[i].isAnnotationPresent(javax.persistence.Id.class)) {
-				return f[i];
+		Class<?> cl =clazz;
+		while (!cl.equals(Object.class)) {
+			Field[] f = cl.getDeclaredFields();
+			for (int i = 0; i < f.length; i++) {
+				if (f[i].isAnnotationPresent(javax.persistence.Id.class)) {
+					return f[i];
+				}
 			}
+			cl= cl.getSuperclass();
+		}
+		return null;
+	}
+	public static Field getFieldOfEntityClass(Class<?> clazz,String name) {
+		Class<?> cl =clazz;
+		while (!cl.equals(Object.class)) {
+			Field[] f = cl.getDeclaredFields();
+			for (int i = 0; i < f.length; i++) {
+				if (f[i].getName().equals(name)) {
+					return f[i];
+				}
+			}
+			cl= cl.getSuperclass();
 		}
 		return null;
 	}

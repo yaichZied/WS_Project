@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,12 +22,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import tn.iit.ws.entities.users.User;
 import tn.iit.ws.utils.search.criteria.Criteria;
 import tn.iit.ws.utils.serializers.CriteriaDeserializer;
 import tn.iit.ws.utils.serializers.ResponseMapper;
@@ -38,7 +39,8 @@ public abstract class GenericController<T, V extends Serializable> {
 	private final Class<T> ENTITY;
 	@Autowired
 	private EntityManager em;
-	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 	private ResponseMapper<T> responseMapper;
 
 	@SuppressWarnings("unchecked")
@@ -100,14 +102,7 @@ public abstract class GenericController<T, V extends Serializable> {
 		Criteria criteria=null;
 		try {
 			criteria = mapper.readValue(request.getInputStream(), Criteria.class);
-		} catch (JsonParseException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (JsonMappingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
+		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 		
@@ -204,6 +199,10 @@ public abstract class GenericController<T, V extends Serializable> {
 						if (f[i].get(entity) != null && !Modifier.isStatic(f[i].getModifiers())
 								&& !f[i].isAnnotationPresent(javax.persistence.Id.class)) {
 							f[i].set(t, f[i].get(entity));
+							if(t instanceof User && f[i].getName().equals("password")) {
+								User u = (User) t ;
+								u.setPassword(passwordEncoder.encode(u.getPassword()));
+							}
 						}
 					} catch (IllegalArgumentException e) {
 					} catch (IllegalAccessException e) {
@@ -239,6 +238,10 @@ public abstract class GenericController<T, V extends Serializable> {
 			return;
 		}
 		UtilConstants.setIdOfEntity(t, null);
+		if(t instanceof User) {
+			User u = (User) t ;
+			u.setPassword(passwordEncoder.encode(u.getPassword()));
+		}
 		em.persist(t);
 		em.flush();
 		em.refresh(t);
