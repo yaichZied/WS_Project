@@ -189,7 +189,7 @@ public class InitComponent {
 		}
 		teachers = new ArrayList<>();
 		for (int j = 0; j < 30; j++) {
-			String name = studentNames.get(j);
+			String name = teacherNames.get(j);
 			String username = name.replaceAll(" ", ".");
 			Teacher teacher = new Teacher();
 			teacher.setEmail(username + "@examplemail.com");
@@ -262,7 +262,13 @@ public class InitComponent {
 							a = (int) (Math.random()*classRooms.size());
 						}
 						takenTeacher.add(a);
-						course.setTeacher(teachers.get(a));
+						group = groupRepository.findOne(group.getId());
+						Teacher t = teachers.get(a);
+						if(!group.getTeachers().contains(t))
+							group.getTeachers().add(t);
+						group= groupRepository.save(group);
+						group = groupRepository.findOne(group.getId());
+						course.setTeacher(t);
 						course.setTimeSlot(cts1);
 						courseRepository.save(course);
 					} else {
@@ -283,7 +289,13 @@ public class InitComponent {
 								a = (int) (Math.random()*classRooms.size());
 							}
 							takenTeacherA.add(a);
-							course.setTeacher(teachers.get(a));
+							group = groupRepository.findOne(group.getId());
+							Teacher t = teachers.get(a);
+							if(!group.getTeachers().contains(t))
+								group.getTeachers().add(t);
+							group= groupRepository.save(group);
+							group = groupRepository.findOne(group.getId());
+							course.setTeacher(t);
 							course.setTimeSlot(cts1A);
 							courseRepository.save(course);
 						} else {
@@ -304,7 +316,13 @@ public class InitComponent {
 									a = (int) (Math.random()*classRooms.size());
 								}
 								takenTeacherB.add(a);
-								course.setTeacher(teachers.get(a));
+								group = groupRepository.findOne(group.getId());
+								Teacher t = teachers.get(a);
+								if(!group.getTeachers().contains(t))
+									group.getTeachers().add(t);
+								group= groupRepository.save(group);
+								group = groupRepository.findOne(group.getId());
+								course.setTeacher(t);
 								course.setTimeSlot(cts1B);
 								courseRepository.save(course);
 							}
@@ -329,7 +347,7 @@ public class InitComponent {
 			e.printStackTrace();
 		}
 		teacherNames = new ArrayList<>();
-		resource = resourceLoader.getResource("classpath:names/students");
+		resource = resourceLoader.getResource("classpath:names/teachers");
 		try {
 			Scanner sc = new Scanner(resource.getInputStream());
 			while (sc.hasNext()) {

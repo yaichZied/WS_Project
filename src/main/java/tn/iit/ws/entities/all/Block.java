@@ -6,10 +6,19 @@ import javax.persistence.Id;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import tn.iit.ws.entities.users.User;
+import tn.iit.ws.security.config.authorization.annotations.CanAdd;
+import tn.iit.ws.security.config.authorization.annotations.CanDelete;
+import tn.iit.ws.security.config.authorization.annotations.CanEdit;
+import tn.iit.ws.security.config.authorization.annotations.CanSee;
 
 @Entity
 @Data
 @EqualsAndHashCode(of="id")
+@CanSee(value="ROLE_ADMIN")
+@CanAdd(value="ROLE_ADMIN")
+@CanEdit(value="ROLE_ADMIN")
+@CanDelete(value="ROLE_ADMIN")
 public class Block {
 	@Id
 	@GeneratedValue
@@ -19,5 +28,12 @@ public class Block {
 	public String getDisplayName()
 	{
 		return name;
+	}
+	@CanSee
+	private boolean canSee(User user) {
+		if(this.id==1) {
+			return true;
+		}
+		return false;
 	}
 }

@@ -39,7 +39,6 @@ public class SingleCriteria extends Criteria {
 
 	@Override
 	public void setValues(Query query) {
-		System.out.println("setting value " + this.id + " : " + value);
 		if (this.value instanceof Date) {
 			Date d = (Date) this.value;
 			Calendar c = Calendar.getInstance();

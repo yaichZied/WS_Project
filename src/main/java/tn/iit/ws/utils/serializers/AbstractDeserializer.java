@@ -37,7 +37,7 @@ public class AbstractDeserializer<T> extends StdDeserializer<T> {
 		Field idField = UtilConstants.getIdFieldOfEntityClass(handledType());
 		JsonNode idNode = node.get(idField.getName());
 		T entity = null;
-		if (idNode.isValueNode()) {
+		if (idNode!=null&&idNode.isValueNode()) {
 			String textId = idNode.asText();
 			if (textId != null && !textId.isEmpty()) {
 				Class<?> idType = UtilConstants.getIdFieldOfEntityClass(handledType()).getType();

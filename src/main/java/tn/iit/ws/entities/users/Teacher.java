@@ -15,7 +15,10 @@ import lombok.Setter;
 @Getter @Setter
 public class Teacher extends User {
 	private static final long serialVersionUID = -2733994786562901142L;
-	
+
+//	@JsonIgnore
+//	@ManyToMany(mappedBy="teachers",fetch=FetchType.EAGER,cascade=CascadeType.ALL)
+//	private Set<Group> groups= new HashSet<>();
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"),new SimpleGrantedAuthority("ROLE_TEACHER"));
 	}

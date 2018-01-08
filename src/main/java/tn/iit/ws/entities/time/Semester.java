@@ -8,10 +8,16 @@ import javax.persistence.Id;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import tn.iit.ws.security.config.authorization.annotations.CanAdd;
+import tn.iit.ws.security.config.authorization.annotations.CanDelete;
+import tn.iit.ws.security.config.authorization.annotations.CanEdit;
 
 @Entity
 @Data
 @EqualsAndHashCode(of = "id")
+@CanAdd(value="ROLE_ADMIN")
+@CanEdit(value="ROLE_ADMIN")
+@CanDelete(value="ROLE_ADMIN")
 public class Semester {
 	@Id
 	@GeneratedValue
