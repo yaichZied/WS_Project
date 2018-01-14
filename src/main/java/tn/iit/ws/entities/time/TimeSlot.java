@@ -15,7 +15,7 @@ import tn.iit.ws.security.config.authorization.annotations.CanSee;
 @Entity
 @Data
 @EqualsAndHashCode(of="id")
-@CanSee(value= {"ROLE_ADMIN","ROLE_POINTING"})
+@CanSee(value= {"ROLE_ADMIN","ROLE_POINTING","ROLE_TEACHER"})
 @CanAdd(value="ROLE_ADMIN")
 @CanEdit(value="ROLE_ADMIN")
 @CanDelete(value="ROLE_ADMIN")

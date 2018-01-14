@@ -33,6 +33,9 @@ public class Pointing {
 	private Date date;
 	@ManyToOne
 	private Course course;
+	public Pointing(){
+		date = new Date();
+	}
 	public String getDisplayName()
 	{
 		DateFormat df = DateFormat.getDateInstance();

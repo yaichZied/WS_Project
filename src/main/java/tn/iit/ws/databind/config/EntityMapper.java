@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import tn.iit.ws.utils.serializers.AbstractDeserializer;
 import tn.iit.ws.utils.serializers.ClassSerializer;
 import tn.iit.ws.utils.serializers.FieldSerializer;
+import tn.iit.ws.utils.serializers.ResponseSerializer;
 
 @Configuration
 public class EntityMapper {
@@ -38,11 +39,12 @@ public class EntityMapper {
 			Class<? extends Object> clazz = iterator.next();
 			AbstractDeserializer deser = new AbstractDeserializer(clazz, appConetxt, mapper);
 			entityModule.addDeserializer(clazz, deser);
+			ResponseSerializer serial = new ResponseSerializer((Class<Object>) clazz,appConetxt);
+			entityModule.addSerializer(clazz, serial);
 		}
 		SimpleModule classFieldModule = new SimpleModule("ClassFieldModule", new Version(1, 0, 0, null, null, null));
-		classFieldModule.addSerializer(Class.class, new ClassSerializer(Class.class));
+		classFieldModule.addSerializer(Class.class, new ClassSerializer(Class.class,appConetxt));
 		classFieldModule.addSerializer(Field.class, new FieldSerializer(Field.class));
-
 		mapper.registerModule(entityModule);
 		mapper.registerModule(classFieldModule);
 		return mapper;

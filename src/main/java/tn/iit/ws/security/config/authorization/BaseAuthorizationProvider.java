@@ -9,8 +9,9 @@ import org.springframework.stereotype.Service;
 
 import tn.iit.ws.entities.users.User;
 import tn.iit.ws.repositories.UserRepository;
+
 @Service
-public class BaseAuthorizationProvider implements PermissionEvaluator{
+public class BaseAuthorizationProvider implements PermissionEvaluator {
 
 	@Autowired
 	private AddPermissionProvider addPermissionProvider;
@@ -24,24 +25,24 @@ public class BaseAuthorizationProvider implements PermissionEvaluator{
 	private EditPermissionProvider editPermissionProvider;
 	@Autowired
 	private UserRepository userRepository;
-	
-	
+
 	@Override
 	public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
-		if(!authentication.isAuthenticated())
+		if (!authentication.isAuthenticated())
 			return false;
 		User user = userRepository.findByUsername(authentication.getName());
-		if(user==null)
+		if (user == null)
 			return false;
-		if(targetDomainObject.getClass().equals(Class.class)) {
-			if(!classReadPermissionProvider.hasPermission(user, targetDomainObject))
+		if (targetDomainObject == null)
+			return false;
+		if (targetDomainObject.getClass().equals(Class.class)) {
+			if (!classReadPermissionProvider.hasPermission(user, targetDomainObject))
+				return false;
+		} else {
+			if (!classReadPermissionProvider.hasPermission(user, targetDomainObject.getClass()))
 				return false;
 		}
-		else {
-			if(!classReadPermissionProvider.hasPermission(user, targetDomainObject.getClass()))
-				return false;
-		}
-		
+
 		switch (permission.toString()) {
 		case "CLASS_READ":
 			return true;
@@ -62,7 +63,7 @@ public class BaseAuthorizationProvider implements PermissionEvaluator{
 	@Override
 	public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType,
 			Object permission) {
-		
+
 		return false;
 	}
 

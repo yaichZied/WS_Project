@@ -5,6 +5,8 @@ import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,7 +24,9 @@ public class Semester {
 	@Id
 	@GeneratedValue
 	private Long id;
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date begin;
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date end;
 
 	public String getDisplayName() {

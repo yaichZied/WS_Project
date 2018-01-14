@@ -1,54 +1,47 @@
 package tn.iit.ws.utils.serializers;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-public class ResponseSerializer<T> extends StdSerializer<T> {
-	private static final long serialVersionUID = 6091816030284681907L;
-	private String[] fields;
-	private final Class<T> ENTITY;
-	public ResponseSerializer(Class<T> t,Class<T> ENTITY) {
+import tn.iit.ws.security.config.authorization.BaseAuthorizationProvider;
+
+public class ResponseSerializer extends StdSerializer<Object> {
+
+	private static final long serialVersionUID = -7409356447075915597L;
+	BaseAuthorizationProvider authorizationProvider;
+	public ResponseSerializer(Class<Object> t,ApplicationContext appConext) {
 		super(t);
-		this.ENTITY=ENTITY;
+		this.authorizationProvider=appConext.getBean(BaseAuthorizationProvider.class);
 	}
 
 	@Override
-	public void serialize(T t, JsonGenerator jsonGenerator, SerializerProvider serializer) throws IOException {
-		jsonGenerator.writeStartObject();
-		for (int i = 0; i < fields.length; i++) {
-			try {
-				Field field = ENTITY.getDeclaredField(fields[i]);
-				boolean accessible = field.isAccessible();
-				field.setAccessible(true);
-				jsonGenerator.writeObjectField(field.getName(), field.get(t));
-				field.setAccessible(accessible);
-			} catch (Exception e) {
-				e.printStackTrace();
-			} 
+	public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+		jgen.writeStartObject();
+		JavaType javaType = provider.constructType(value.getClass());
+		BeanDescription beanDesc = provider.getConfig().introspect(javaType);
+		JsonSerializer<Object> serializer = BeanSerializerFactory.instance.findBeanSerializer(provider, javaType,
+				beanDesc);
+		serializer.unwrappingSerializer(null).serialize(value, jgen, provider);
+		Class<?> cl = value.getClass();
+		String className = cl.getSimpleName();
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		boolean canEdit = authorizationProvider.hasPermission(auth, value, "EDIT");
+		boolean canDelete = authorizationProvider.hasPermission(auth, value, "DELETE");
+		jgen.writeStringField("className", String.format("%s%s",Character.toLowerCase(className.charAt(0)),className.substring(1)));
+		jgen.writeBooleanField("canEdit", canEdit);
+		jgen.writeBooleanField("canDelete", canDelete);
+		jgen.writeEndObject();
+	}
 
-		}
-		Method method;
-		try {
-			method = ENTITY.getDeclaredMethod("getDisplayName");
-			boolean accessible = method.isAccessible();
-			method.setAccessible(true);
-			Object obj = method.invoke(t);
-			jsonGenerator.writeObjectField("displayName",obj );
-			method.setAccessible(accessible);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		jsonGenerator.writeEndObject();
-	}
-	public String[] getFields() {
-		return fields;
-	}
-	public void setFields(String[] fields) {
-		this.fields = fields;
-	}
 }

@@ -91,10 +91,20 @@ public abstract class GenericController<T, V extends Serializable> {
 	}
 
 	@RequestMapping(value = "structure", method = RequestMethod.GET)
-	@PreAuthorize("hasPermission(this.ENTITY, 'CLASS_READ')")
 	@ResponseBody
 	public Class<?> structure(HttpServletRequest request, HttpServletResponse response) {
 		return ENTITY;
+	}
+	
+	@RequestMapping(value = "default", method = RequestMethod.GET)
+	@PreAuthorize("hasPermission(this.ENTITY, 'ADD')")
+	@ResponseBody
+	public T defaultValue(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			return ENTITY.newInstance();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@RequestMapping(value = "{id}", method = RequestMethod.PUT)
