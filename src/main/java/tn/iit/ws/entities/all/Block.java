@@ -24,7 +24,6 @@ public class Block {
 	@GeneratedValue
 	private Long id;
 	private String name;
-	private String nameD;
 	
 	public String getDisplayName()
 	{
