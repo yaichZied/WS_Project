@@ -177,7 +177,11 @@ public class InitComponent {
 			groups.add(group);
 			for (int j = 0; j < 30; j++) {
 				String name = studentNames.get(j + (30 * (i - 1)));
-				String username = name.replaceAll(" \\.", ".").replaceAll(" ", ".");
+				name = name.trim();
+				String username = name.replaceAll("  ", ".").replaceAll("  ", ".").replaceAll(" ", ".");
+				while(!Character.isAlphabetic(username.charAt(username.length()-1))) {
+					username = username.substring(0,username.length()-1);
+				}
 				Student st = new Student();
 				st.setEmail(username + "@examplemail.com");
 				st.setUsername(username);
@@ -190,9 +194,13 @@ public class InitComponent {
 		teachers = new ArrayList<>();
 		for (int j = 0; j < 30; j++) {
 			String name = teacherNames.get(j);
-			String username = name.replaceAll(" \\.", ".").replaceAll(" ", ".");
+			name = name.trim();
+			String username = name.replaceAll("  ", ".").replaceAll("  ", ".").replaceAll(" ", ".");
+			while(!Character.isAlphabetic(username.charAt(username.length()-1))) {
+				username = username.substring(0,username.length()-1);
+			}
 			Teacher teacher = new Teacher();
-			teacher.setEmail(username + "@examplemail.com");
+			teacher.setEmail(String.format("khaledbaklouti8+%s@gmail.com", username));
 			teacher.setUsername(username);
 			teacher.setName(name);
 			teacher.setPassword(passwordEncoder.encode(username));

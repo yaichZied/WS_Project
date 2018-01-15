@@ -38,10 +38,15 @@ public class Pointing {
 	}
 	public String getDisplayName()
 	{
-		DateFormat df = DateFormat.getDateInstance();
-		if(course!=null)
-			return String.format("Pointing for : %s at %s ",course.getDisplayName(), df.format(date));
-		return String.format("Pointing at %s ", df.format(date));
+		try {
+			DateFormat df = DateFormat.getDateInstance();
+			if(course!=null)
+				return String.format("Pointing for : %s at %s ",course.
+						getDisplayName(), df.format(date));
+			return String.format("Pointing at %s ", df.format(date));
+		} catch (Exception e) {
+			return "";
+		}
 	}
 	@CanSee
 	private boolean addAuth(User user) {

@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class UtilConstants {
+public class UtilConstants { 
 	private static final Pattern PATTERN_ENTITY = Pattern.compile("\\<(.*)\\,");
 	private static final Map<String, String> REGEXES;
 	static {

@@ -29,11 +29,4 @@ public class Block {
 	{
 		return name;
 	}
-	@CanSee
-	private boolean canSee(User user) {
-		if(this.id==1) {
-			return true;
-		}
-		return false;
-	}
 }

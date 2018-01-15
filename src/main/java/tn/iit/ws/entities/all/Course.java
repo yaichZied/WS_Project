@@ -38,7 +38,7 @@ public class Course {
 		try {
 			return String.format("%s : %s ( %s : %s )", subject.getName(),teacher.getName(), group.getName(), classRoom.getName());
 		} catch (Exception e) {
-			return "Invalide";
+			return "";
 		}
 	}
 	@CanSee

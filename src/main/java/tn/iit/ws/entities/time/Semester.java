@@ -30,8 +30,12 @@ public class Semester {
 	private Date end;
 
 	public String getDisplayName() {
-		return String.format(" From %1$ta %1$td %1$tB %1$tY To  %2$ta %2$td %2$tB %2$tY", begin, end);
-
+		try {
+			
+			return String.format(" From %1$ta %1$td %1$tB %1$tY To  %2$ta %2$td %2$tB %2$tY", begin, end);
+			} catch (Exception e) {
+			return "";
+		}
 	}
 
 }

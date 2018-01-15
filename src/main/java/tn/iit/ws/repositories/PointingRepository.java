@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import tn.iit.ws.entities.all.Course;
 import tn.iit.ws.entities.all.Pointing;
+
 @Repository
 public interface PointingRepository extends JpaRepository<Pointing, Long> {
-	List<Pointing> findByCourseAndDateBetween(Course course,Date date1,Date date2);
+	List<Pointing> findByCourseAndDateBetween(Course course, Date date1, Date date2);
 }

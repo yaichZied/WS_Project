@@ -11,6 +11,10 @@ public class Vacation extends InterruptionPeriod{
 	@Override
 	public String getDisplayName()
 	{
-		return String.format("Vacation : %s", super.getDisplayName());
+		try {
+			return String.format("Vacation : %s", super.getDisplayName());
+		} catch (Exception e) {
+			return "";
+		}
 	}
 }
