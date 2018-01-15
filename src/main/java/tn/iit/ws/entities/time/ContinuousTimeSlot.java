@@ -25,12 +25,17 @@ public class ContinuousTimeSlot extends TimeSlot {
 	private Boolean weekA;
 	@Override
 	public String getDisplayName() {
-		Calendar c = Calendar.getInstance();
-		c.set(Calendar.DAY_OF_WEEK,day+1);
-		if(!weekly)
-		{
-			return String.format("%tA %02d:%02d => %02d:%02d (Week %s)", c, begin / 60, begin % 60, end / 60, end % 60,weekA?"A":"B");
+		try {
+			Calendar c = Calendar.getInstance();
+			c.set(Calendar.DAY_OF_WEEK,day+1);
+			if(!weekly)
+			{
+				return String.format("%tA %02d:%02d => %02d:%02d (Week %s)", c, begin / 60, begin % 60, end / 60, end % 60,weekA?"A":"B");
+			}
+			return String.format("%tA %02d:%02d => %02d:%02d ", c, begin / 60, begin % 60, end / 60, end % 60);
+		} catch (Exception e) {
+			return"";
 		}
-		return String.format("%tA %02d:%02d => %02d:%02d ", c, begin / 60, begin % 60, end / 60, end % 60);
+		
 	}
 }
