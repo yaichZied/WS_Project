@@ -15,6 +15,7 @@ import tn.iit.ws.utils.annotations.Type;
 @Setter
 @CanSee(value= {"ROLE_ADMIN","ROLE_POINTING"})
 public class ContinuousTimeSlot extends TimeSlot {
+	@Type("day")
 	private Integer day;
 	@Type("time")
 	private Integer begin;

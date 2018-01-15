@@ -219,18 +219,16 @@ public class UtilConstants {
 	}
 
 	public static Object getIdOfEntity(Object entity) {
-		Field[] f = entity.getClass().getDeclaredFields();
-		for (int i = 0; i < f.length; i++) {
-			f[i].setAccessible(true);
-			if (f[i].isAnnotationPresent(javax.persistence.Id.class)) {
-				try {
-					return f[i].get(entity);
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				}
-			}
+		Field f = getIdFieldOfEntityClass(entity.getClass());
+		boolean accessible = f.isAccessible();
+		Object res;
+		try {
+			f.setAccessible(true);
+			res = f.get(entity);
+			f.setAccessible(accessible);
+			return res;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return null;
 	}
